@@ -1,6 +1,6 @@
 import java.util.Scanner;
 
-public class VacabularyApp {
+public class VocabularyApp {
 	public static void main(String[] args){
 		Scanner scnr = new Scanner(System.in);
 		WordList GREList = new WordList();
