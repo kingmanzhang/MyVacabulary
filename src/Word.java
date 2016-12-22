@@ -1,3 +1,4 @@
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -6,6 +7,13 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
+/**
+ * A Word class to manage single words. Each word should at least have a name, meaning, 
+ * and example usage in sentences. A user can type in the meaning and example sentences, 
+ * or alternatively, important them from the Merriam-Webster's Dictionary. 
+ * @author Xingmin Zhang
+ *
+ */
 public class Word implements Comparable<Word> {
 	private String word_name;
 	private String word_meaning;
@@ -62,9 +70,15 @@ public class Word implements Comparable<Word> {
 		}
 	}
 	
+	//My API key for Merriam-Webster's Dictionary
 	private final String DICTIONARY_KEY = "73b58ad7-1efd-43b8-944f-70f801e2c801";
 	private final String THESAURUS_KEY = "ec834769-f0b2-4ab9-a1cf-98ae44838ab5";
 	
+	/**
+	 * A method to generate a URL for a word.
+	 * @return
+	 * @throws MalformedURLException
+	 */
 	public URL getDictionaryURL() throws MalformedURLException {
 		URL url = new URL("http://www.dictionaryapi.com/api/v1/references/collegiate/xml/" + 
 	 this.getName() + "?key=" + DICTIONARY_KEY);
@@ -77,6 +91,9 @@ public class Word implements Comparable<Word> {
 		return url;
 	}
 	
+	/**
+	 * A method to query a word to the Marriam-Webster's Dictionary
+	 */
 	public void getMerriamWebster() {
 		try {
 			URLConnection connection = getDictionaryURL().openConnection();

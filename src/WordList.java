@@ -1,5 +1,10 @@
 import java.util.ArrayList;
-
+/**
+ * A WordList class to manager word lists. A user should be able to add, delete or show
+ * words. 
+ * @author Xingmin Zhang
+ *
+ */
 public class WordList {
 	
 	private ArrayList<Word> wordList; 
