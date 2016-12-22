@@ -1,9 +1,11 @@
 import java.util.ArrayList;
 
 public class WordList {
+	
 	private ArrayList<Word> wordList; 
 	
 	public WordList() {
+		
 		this.wordList = new ArrayList<>();
 	}
 	
