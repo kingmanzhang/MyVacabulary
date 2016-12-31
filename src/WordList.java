@@ -30,16 +30,32 @@ public class WordList {
 		for (Word e: wordList) {
 			if (e.getName().equals(word)) {
 				wordList.remove(e);
+				break;
 			}
 		}
 	}
 	
+	public int size() {
+		return wordList.size();
+	}
+	
 	public void printList() {
-		for (Word e: wordList) {
-			System.out.println(e.getName());
-			System.out.println(e.getMeaning());
-			e.printExample();
+		System.out.println("Words in current word list");
+		System.out.println("\n---------------------------------------------");
+		if(wordList.size() == 0) {
+			System.out.println("Empty word list");
+		} else {
+			int i = 1;
+			for (Word e: wordList) {
+				System.out.println(i + ":" +  e.getName());
+				System.out.println(e.getMeaning());
+				e.printExample();
+				System.out.println("");
+				i++;
+			}
 		}
+		System.out.println("---------------------------------------------\n");
+	
 	}
 
 }

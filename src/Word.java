@@ -64,7 +64,7 @@ public class Word implements Comparable<Word> {
 
 	public void printExample() {
 		for (int i = 0; i < this.getExample().length; i++) {
-			if(this.getExample()[i] != null) {
+			if(this.getExample()[i] != "" & !this.getExample()[i].equals("null")) {
 				System.out.println(this.getExample()[i]);
 			}
 		}
@@ -94,21 +94,33 @@ public class Word implements Comparable<Word> {
 	/**
 	 * A method to query a word to the Marriam-Webster's Dictionary
 	 */
-	public void getMerriamWebster() {
+	public String getMerriamWebster() {
 		try {
 			URLConnection connection = getDictionaryURL().openConnection();
 			InputStream streamMerriamWebster = connection.getInputStream();
 			BufferedReader streamBuffer = new BufferedReader(new InputStreamReader(streamMerriamWebster));
 			String line = null;
+			String response = "";
 			while((line = streamBuffer.readLine()) != null) {
-				System.out.println(line);
+				response = response + line + "\n";
 			}
+			//System.out.println("Response from Merriam-Webster is: \n" + response);
+			return response;
 		} catch (MalformedURLException e) {
 			System.out.println("URL is not formed correctly");
-			
+			return null;
 		} catch (IOException e) {
 			System.out.println("Cannot establish connection to Merriam-Webster");
+			return null;
 		}
+	}
+	
+	public String getMerriamWebsterMeaning() {
+		String meaning = "";
+		String xml = this.getMerriamWebster();
+		MerriamWebsterXMLParser merriamWebsterXMLParser = new MerriamWebsterXMLParser(xml);
+		merriamWebsterXMLParser.getMeaning();
+		return meaning;
 	}
 	
 	@Override
