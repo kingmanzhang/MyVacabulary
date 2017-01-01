@@ -19,16 +19,24 @@ import org.xml.sax.SAXException;
  */
 
 public class MerriamWebsterXMLParser {
+	
 	private String xml;
 	
 	
 	//private String[][] meaning; //first dimension is entry
 	                            //second dimension is meaning
-	
+	//The parser takes in an XML reponse for a word from the Merriam's-Webster Dictionary
 	public MerriamWebsterXMLParser(String xml) {
 		this.xml = xml;
 	}
 	
+	/**
+	 * A method to parse the XML reponse. 
+	 * @return a document. 
+	 * @throws ParserConfigurationException
+	 * @throws SAXException
+	 * @throws IOException
+	 */
 	public Document parse() throws ParserConfigurationException, SAXException, IOException {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder builder = factory.newDocumentBuilder();
@@ -39,6 +47,10 @@ public class MerriamWebsterXMLParser {
 		return doc;
 	}
 	
+	/**
+	 * A method to extract meanings of a word
+	 * @return the meaning of a word.
+	 */
 	public String[] getMeaning() {
 		
 		try {
@@ -51,7 +63,7 @@ public class MerriamWebsterXMLParser {
 				aMeaning = nMeaningNode.getTextContent().trim() + ";";
 				if(!aMeaning.equals(":") && !aMeaning.equals("")) {
 					meaning[j] = aMeaning;	
-					System.out.println(j + meaning[j]);
+					System.out.println((j + 1) + meaning[j]);
 				}	
 			}
 

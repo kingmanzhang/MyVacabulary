@@ -15,6 +15,8 @@ public class testClass {
 		for (int i = 0; i < str.length; i++) {
 			System.out.println(str[i]);
 		}
+		WordList newList = new WordList();
+		System.out.println(newList.size());
 		
 	}
 

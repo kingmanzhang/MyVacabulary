@@ -6,6 +6,7 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
+import java.util.Arrays;
 
 /**
  * A Word class to manage single words. Each word should at least have a name, meaning, 
@@ -14,7 +15,7 @@ import java.net.URLConnection;
  * @author Xingmin Zhang
  *
  */
-public class Word implements Comparable<Word> {
+public class Word implements Comparable<Word>, Cloneable {
 	private String word_name;
 	private String word_meaning;
 	private String[] word_example;
@@ -62,21 +63,26 @@ public class Word implements Comparable<Word> {
 		return word_example;
 	}
 
+	/**
+	 * A method to print the example sentences of a word.
+	 */
 	public void printExample() {
 		for (int i = 0; i < this.getExample().length; i++) {
-			if(this.getExample()[i] != "" & !this.getExample()[i].equals("null")) {
+			if(this.getExample() != null & this.getExample()[i] != "") {
 				System.out.println(this.getExample()[i]);
 			}
 		}
 	}
+	
+	//& this.getExample()[i] != "" & !this.getExample()[i].equals("null")
 	
 	//My API key for Merriam-Webster's Dictionary
 	private final String DICTIONARY_KEY = "73b58ad7-1efd-43b8-944f-70f801e2c801";
 	private final String THESAURUS_KEY = "ec834769-f0b2-4ab9-a1cf-98ae44838ab5";
 	
 	/**
-	 * A method to generate a URL for a word.
-	 * @return
+	 * A method to generate a URL (Dictionary) for a word.
+	 * @return the URL.
 	 * @throws MalformedURLException
 	 */
 	public URL getDictionaryURL() throws MalformedURLException {
@@ -85,6 +91,12 @@ public class Word implements Comparable<Word> {
 		return url;
 	}
 	
+	
+	/**
+	 * A method to generate a URL (Thesaurus) for a word.
+	 * @return the URL
+	 * @throws MalformedURLException
+	 */
 	public URL getThesaurusURL() throws MalformedURLException {
 		URL url = new URL("http://www.dictionaryapi.com/api/v1/references/thesaurus/xml/" + 
 				 this.getName() + "?key=" + THESAURUS_KEY);
@@ -93,8 +105,9 @@ public class Word implements Comparable<Word> {
 	
 	/**
 	 * A method to query a word to the Marriam-Webster's Dictionary
+	 * @return the XML response of a word.
 	 */
-	public String getMerriamWebster() {
+	private String getMerriamWebster() {
 		try {
 			URLConnection connection = getDictionaryURL().openConnection();
 			InputStream streamMerriamWebster = connection.getInputStream();
@@ -115,6 +128,11 @@ public class Word implements Comparable<Word> {
 		}
 	}
 	
+	
+	/**
+	 * A method to get the meanings of a word parsed from the XML response
+	 * @return the meaning of a word
+	 */
 	public String getMerriamWebsterMeaning() {
 		String meaning = "";
 		String xml = this.getMerriamWebster();
@@ -123,10 +141,51 @@ public class Word implements Comparable<Word> {
 		return meaning;
 	}
 	
+	/**
+	 * A method to override the compareTo method. 
+	 * Compare word alphabetically. 
+	 */
 	@Override
 	public int compareTo(Word o) {
 		return this.getName().compareTo(o.getName());
 	}
 	
+	/**
+	 * A method to determine whether two words are equal. 
+	 * Two words are equal only when all their fields are identical. 
+	 */
+	@Override
+	public boolean equals(Object o) {
+		boolean equals = false;
+		if(o instanceof Word) {
+			Word otherWord = (Word) o;
+			if (this.getName().equals(otherWord.getName()) 
+					& this.getMeaning().equals(otherWord.getMeaning())
+					& Arrays.equals(this.getExample(), otherWord.getExample())) {
+				equals = true;
+			}
+		}
+		return equals;
+	}
+	
+	
+	/**
+	 * A method to (deep) clone a word. 
+	 * The cloned copy should have its own copy of all the fields of a word.  
+	 */
+	public Word clone() {
+		Word copy = new Word();
+		copy.word_name = new String(this.word_name);
+		copy.word_meaning = new String(this.word_meaning);
+		copy.word_example = new String[word_example.length];
+		for (int i = 0; i < this.word_example.length; i++) {
+			if(word_example != null) {
+				copy.word_example[i] = new String(this.word_example[i]);
+			}
+			
+		}
+		return copy;
+		
+	}
 
 }

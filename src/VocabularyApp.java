@@ -1,9 +1,12 @@
+import java.awt.Desktop;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Scanner;
 
 public class VocabularyApp {
@@ -11,6 +14,7 @@ public class VocabularyApp {
 		final String FILE_EXTENSION = "wdl";
 		final String FILE_PATH = "./";
 		int numLists = 0;
+		boolean validInput = false;
 		WordList myList = new WordList();
 		String filename = "";
 		Scanner scnr = new Scanner(System.in);
@@ -22,55 +26,89 @@ public class VocabularyApp {
 		if (numLists == 0) {
 			filename = createList(FILE_PATH, scnr);
 		} else {
-			System.out.println("\nChoose: O)pen existing list C)reat a new list");
-			char choice = scnr.nextLine().toLowerCase().charAt(0);
-			if (choice == 'o') {
-				System.out.println("Which file to open");
-				filename = scnr.nextLine();
-				String[] str;
-				String newLine;
-				String word_name;
-				String word_meaning;
-				String[] word_sentences;
-				try {
-					FileInputStream list = new FileInputStream(filename);
-					//myList = readFromFile(list);
-					Scanner wordParser = new Scanner(list);
-					while(wordParser.hasNextLine()) {
-						newLine = wordParser.nextLine();
-						str = newLine.split(";");
-						word_sentences = new String[] {"", "", "", "", ""};
-						word_name = str[0];
-						word_meaning = str[1];
-						for (int i = 0; i < str.length - 2; i++) {
-							word_sentences[i] = str[i + 2];
+			char choice = ' ';
+			do {
+				System.out.println("\nChoose: O)pen a list C)reat a new list D)elete a list ");
+				choice = scnr.nextLine().toLowerCase().charAt(0);
+				//open a file of word list
+				if (choice == 'o') {
+					validInput = true;
+					boolean fileOpened = false;
+					do {
+						System.out.println("Which file to open");
+						filename = scnr.nextLine();
+						try {
+							myList = openList(filename);
+							fileOpened = true;
+						} catch (Exception e) {
+							fileOpened = false;
+							System.out.println("Invalid file name. Type again.");
 						}
-						Word newWord = new Word(word_name, word_meaning, word_sentences);
-						myList.addWord(newWord);
-					}
-					wordParser.close();
-					list.close();
-				} catch (FileNotFoundException e) {
-					System.out.println("Cannot open file");
-				} catch (IOException e) {
-					System.out.println("InputStream cannot be closed");
-					e.printStackTrace();
+					} while (!fileOpened);
+				//create a new file of word list
+				} else if (choice == 'c'){
+					validInput = true;
+					filename = createList(FILE_PATH, scnr);
+				//delete a file of word list
+				} else if (choice == 'd') {
+					validInput = true;
+					boolean fileDeleted = false;
+					do {
+						System.out.println("Which file to delete");
+						filename = scnr.nextLine();
+						try{
+				    		File file = new File(filename);
+				    		if(file.delete()){
+				    			fileDeleted = true;
+				    			System.out.println(file.getName() + " is deleted!");
+				    		}else{
+				    			System.out.println("Delete operation is failed.");
+				    		}
+						}catch(Exception e){
+				    		e.printStackTrace();
+				    	}
+					} while (!fileDeleted);
+				} else {
+					System.out.println("Invalid input.");
+					validInput = false;
 				}	
-			} else {
-				filename = createList(FILE_PATH, scnr);
-			}
+			} while (!validInput || choice == 'd');
 		}
 			
-		//start working with words
+		//keep a clone of current word list
+		WordList originalList = null;
+		try {
+			originalList = myList.clone();
+		} catch (CloneNotSupportedException e) {
+			e.printStackTrace();
+		}
+		
+		//start working with a word list
+		//can put this loop inside the upper loop
 		boolean quit = false; 
 		while (!quit) {
 			myList.printList();
-			System.out.println("Choose: A)dd D)elete S)how W)rite Q)uit");
-			char choice = scnr.nextLine().toLowerCase().charAt(0);
+			validInput = false;
+			char choice = ' ';
+			do {
+				System.out.println("Choose: A)dd D)elete S)how W)rite Q)uit");
+				if (!scnr.hasNextInt()) {
+					choice = scnr.nextLine().toLowerCase().charAt(0);
+					if (choice == 'a' || choice == 'd' || choice == 's' 
+							|| choice == 'w' || choice == 'q') {
+						validInput = true;
+					} else {
+						System.out.println("Input not valid. Type again.");
+					}
+				} else {
+					scnr.nextLine();
+					System.out.println("Input should be a character. Type again.");
+				}
+			} while (!validInput);
+			
 			switch (choice) {
 			case 'a':
 				add(myList, scnr);
-				System.out.println("Adding new word.");
 				pressEnter(scnr);
 				break;
 			case 'd':
@@ -79,7 +117,8 @@ public class VocabularyApp {
 				pressEnter(scnr);
 				break;
 			case 's':
-		      System.out.println("Show a word");
+		      show(myList, scnr);
+		      pressEnter(scnr);
 				break;
 			case 'w': 
 				System.out.println("writing to " + filename);
@@ -87,24 +126,24 @@ public class VocabularyApp {
 				write(myList, filename);
 				break;
 			case 'q':
-				System.out.println("quiting program. Press enter to continue.");
+				quit(originalList, myList, scnr, filename);
+				System.out.println("quiting program.");
+				pressEnter(scnr);
 				quit = true;
 				break;
 			}
 		}
-		
-		System.out.println("---------------------------------------------");
+		System.out.println("\n---------------------------------------------");
 		System.out.println("Thank you for using the app");
-		
 		}
 
-		/*
-		WordList GREList = new WordList();
-		GREList.printList();
-		add(GREList, scnr);
-		GREList.printList();
-		*/
-	
+
+	/**
+	 * A method to create a file for a new word list. 
+	 * @param file_path
+	 * @param scnr
+	 * @return the name of the file. It will be used when saving the list to file. 
+	 */
 	public static String createList(String file_path, Scanner scnr) {
 		System.out.println("What's the name of the list? (end with .wdl)");
 		String listName = scnr.nextLine();
@@ -119,32 +158,106 @@ public class VocabularyApp {
 			return null;
 		}
 	}
-
-	public static void add(WordList wordlist, Scanner scnr) {
+	
+	/**
+	 * A method to open an existing file.
+	 * @param filename: name of file to open. 
+	 * @return a word list parsed from the file. 
+	 * @throws FileNotFoundException
+	 * @throws IOException
+	 */
+	public static WordList openList(String filename) throws FileNotFoundException, IOException{
+		WordList myList = new WordList();
+		String[] str;
+		String newLine;
+		String word_name;
+		String word_meaning;
+		String[] word_sentences;
 		
+		FileInputStream list = new FileInputStream(filename);
+		//myList = readFromFile(list);
+		Scanner wordParser = new Scanner(list);
+		while(wordParser.hasNextLine()) {
+			newLine = wordParser.nextLine();
+			str = newLine.split(";");
+			word_sentences = new String[] {"", "", "", "", ""};
+			word_name = str[0];
+			word_meaning = str[1];
+			for (int i = 0; i < str.length - 2; i++) {
+				word_sentences[i] = str[i + 2];
+			}
+			Word newWord = new Word(word_name, word_meaning, word_sentences);
+			myList.addWord(newWord);
+		}
+		wordParser.close();
+		list.close();
+		
+		return myList;
+	}
+
+	
+	/**
+	 * A method to add new word to a word list. 
+	 * @param wordlist
+	 * @param scnr
+	 */
+	public static void add(WordList wordlist, Scanner scnr) {
 		String[] examples = new String[] {"", "", "", "", ""};
 		System.out.println("Type in word: ");
 		String name = scnr.nextLine();
-		Word newWord = new Word(name);
-		
-		System.out.println("Explaination from Merriam-Webster's Dictionary: ");
-		System.out.println(newWord.getMerriamWebsterMeaning());
-		System.out.println("Type in meaning in one line: ");
-		String meaning = scnr.nextLine();
-		System.out.println("Type in an example sentence: ");
-		examples[0] = scnr.nextLine();
-		newWord.setMeaning(meaning);
-		newWord.setExample(examples);
-		
-		wordlist.addWord(newWord);
+		if (wordlist.contains(name)) {
+			System.out.println("\"" + name + "\" already in list. Update? Y/N" );
+		} else {
+			Word newWord = new Word(name);
+			System.out.println("Explaination from Merriam-Webster's Dictionary: ");
+			System.out.println(newWord.getMerriamWebsterMeaning());
+			System.out.println("Type in meaning in one line: ");
+			String meaning = scnr.nextLine();
+			System.out.println("Type in an example sentence: ");
+			examples[0] = scnr.nextLine();
+			newWord.setMeaning(meaning);
+			newWord.setExample(examples);
+			wordlist.addWord(newWord);
+			System.out.println("Adding new word.");
+		}
 	}
 	
+	
+	/**
+	 * A method to delete a word from a word list.
+	 * @param wordlist
+	 * @param scnr
+	 */
 	public static void delete(WordList wordlist, Scanner scnr) {
-		System.out.print("Type in word to delete: ");
-		String name = scnr.nextLine();
-		wordlist.delete(name);
+		boolean wordDeleted = false;
+		do {
+			System.out.print("Type in word or index to delete: ");
+		   if(scnr.hasNextInt()) {
+		   	int index = scnr.nextInt();
+		   	if (index > 0 & index <= wordlist.size()) {
+		   		wordlist.delete(index);
+		   		wordDeleted = true;
+		   	} else {
+		   		System.out.println("Input index is out of range. Enter a number between 1 and " + wordlist.size());
+		   	}
+		   } else {
+		   	String name = scnr.nextLine();
+		   	try {
+		   		wordlist.delete(name);
+		   		wordDeleted = true;
+		   	} catch (Exception e) {
+		   		System.out.println("Input word not found.");
+		   	}
+		   }
+		} while (!wordDeleted);
 	}
 	
+	
+	/**
+	 * A method to write the current word list to a file. 
+	 * @param wordlist: the word list to write out.
+	 * @param filename: the file that the list should be written to.
+	 */
 	public static void write(WordList wordlist, String filename) {
 	   try {
 	   	//try to create a FileOutputStream to the file
@@ -169,11 +282,75 @@ public class VocabularyApp {
 		}
 	}
 	
-
+	/**
+	 * A method to open a Merriam-Webster's webpage for a word.
+	 * @param wordlist
+	 * @param scnr
+	 */
+	public static void show(WordList wordlist, Scanner scnr) {
+		System.out.println("\nType in the index of a word to show: ");
+		if (scnr.hasNextInt()) {
+			int wordToShow = scnr.nextInt();
+			if (wordToShow  > 0 & wordToShow  <= wordlist.size()) {
+				String URL = "https://www.merriam-webster.com/dictionary/" + wordlist.getWord(wordToShow - 1).getName();
+				try {
+					URI wordURL = new URI(URL);
+					Desktop desktop = Desktop.getDesktop();
+					desktop.browse(wordURL);
+				} catch (URISyntaxException e) {
+					System.out.println("URL formation error");
+				} catch (IOException e) {
+					System.out.println("Cannot open URL");
+				}
+			} else {
+				System.out.println("Input not valid. Enter a number between 1 and " + wordlist.size());
+			}
+		} else {
+			System.out.println("Input should be a number.");
+		}
+		scnr.nextLine();
+	}
 	
+	
+	/**
+	 * A method to deal with quitting. First check whether the word list has changed; 
+	 * if it has, remind user to save it before exiting. 
+	 * @param originalList
+	 * @param newList
+	 * @param scnr
+	 * @param filename
+	 */
+	public static void quit(WordList originalList, WordList newList, Scanner scnr, String filename) {
+		if (originalList.isChanged(newList)) {
+			boolean validChoice = false;
+			do {
+				System.out.print("The list has changed. Do you want to save? Y/N ");
+				if (!scnr.hasNextInt()) {
+					char choice = scnr.nextLine().toLowerCase().charAt(0);
+					if (choice == 'y') {
+						write(newList, filename);
+						validChoice = true;
+					} else if (choice == 'n') {
+						System.out.println("Exit without saving");
+						validChoice = true;
+					} else {
+						System.out.println("Input not recognized. Try again");
+					}
+				}
+			} while (!validChoice);
+		} 
+	}
+	
+
+	/**
+	 * A method to list files in a directory
+	 * @param file_extension
+	 * @param file_path
+	 * @return the number of files with a specified extension.
+	 */
 	public static int fileList(String file_extension, String file_path) {
 		File files = new File("./");
-		System.out.println("My Word Lists: ");
+		System.out.println("\nMy Word Lists: ");
 		int count = 0;
 		for (File file: files.listFiles()) { //print out all files
 			if (file.getName().endsWith(file_extension)) {
