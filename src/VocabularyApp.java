@@ -28,50 +28,53 @@ public class VocabularyApp {
 		} else {
 			char choice = ' ';
 			do {
+				
 				System.out.println("\nChoose: O)pen a list C)reat a new list D)elete a list ");
-				choice = scnr.nextLine().toLowerCase().charAt(0);
-				//open a file of word list
-				if (choice == 'o') {
-					validInput = true;
-					boolean fileOpened = false;
-					do {
-						System.out.println("Which file to open");
-						filename = scnr.nextLine();
-						try {
-							myList = openList(filename);
-							fileOpened = true;
-						} catch (Exception e) {
-							fileOpened = false;
-							System.out.println("Invalid file name. Type again.");
-						}
-					} while (!fileOpened);
-				//create a new file of word list
-				} else if (choice == 'c'){
-					validInput = true;
-					filename = createList(FILE_PATH, scnr);
-				//delete a file of word list
-				} else if (choice == 'd') {
-					validInput = true;
-					boolean fileDeleted = false;
-					do {
-						System.out.println("Which file to delete");
-						filename = scnr.nextLine();
-						try{
-				    		File file = new File(filename);
-				    		if(file.delete()){
-				    			fileDeleted = true;
-				    			System.out.println(file.getName() + " is deleted!");
-				    		}else{
-				    			System.out.println("Delete operation is failed.");
-				    		}
-						}catch(Exception e){
-				    		e.printStackTrace();
-				    	}
-					} while (!fileDeleted);
-				} else {
-					System.out.println("Invalid input.");
-					validInput = false;
-				}	
+				if (scnr.hasNextLine() & !scnr.nextLine().isEmpty() ) {
+					choice = scnr.nextLine().toLowerCase().charAt(0);
+					//open a file of word list
+					if (choice == 'o') {
+						validInput = true;
+						boolean fileOpened = false;
+						do {
+							System.out.println("Which file to open");
+							filename = scnr.nextLine();
+							try {
+								myList = openList(filename);
+								fileOpened = true;
+							} catch (Exception e) {
+								fileOpened = false;
+								System.out.println("Invalid file name. Type again.");
+							}
+						} while (!fileOpened);
+					//create a new file of word list
+					} else if (choice == 'c'){
+						validInput = true;
+						filename = createList(FILE_PATH, scnr);
+					//delete a file of word list
+					} else if (choice == 'd') {
+						validInput = true;
+						boolean fileDeleted = false;
+						do {
+							System.out.println("Which file to delete");
+							filename = scnr.nextLine();
+							try{
+					    		File file = new File(filename);
+					    		if(file.delete()){
+					    			fileDeleted = true;
+					    			System.out.println(file.getName() + " is deleted!");
+					    		}else{
+					    			System.out.println("Delete operation is failed.");
+					    		}
+							}catch(Exception e){
+					    		e.printStackTrace();
+					    	}
+						} while (!fileDeleted);
+					}
+				}else {
+						System.out.println("Invalid input.");
+						validInput = false;
+					}	
 			} while (!validInput || choice == 'd');
 		}
 			
