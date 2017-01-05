@@ -76,10 +76,10 @@ public class WordList implements Cloneable {
 	/*
 	public boolean isChanged(WordList otherWordList) {
 		boolean equalList = false;
-		if (this == null & otherWordList == null) {
+		if (this == null && otherWordList == null) {
 			equalList = true;
-		} else if (this == null & otherWordList != null 
-				|| this != null & otherWordList == null 
+		} else if (this == null && otherWordList != null 
+				|| this != null && otherWordList == null 
 				|| this.size() != otherWordList.size()) {
 			equalList = false;
 		} else {
@@ -98,7 +98,7 @@ public class WordList implements Cloneable {
 	*/
 	public boolean isChanged(WordList otherWordList) {
 		boolean equalList = false;
-		if (this.size() == 0 & otherWordList.size() == 0) {
+		if (this.size() == 0 && otherWordList.size() == 0) {
 			equalList = true;
 		} else if (this.size() != otherWordList.size()) {
 			equalList = false;

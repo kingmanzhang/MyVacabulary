@@ -68,13 +68,13 @@ public class Word implements Comparable<Word>, Cloneable {
 	 */
 	public void printExample() {
 		for (int i = 0; i < this.getExample().length; i++) {
-			if(this.getExample() != null & this.getExample()[i] != "") {
+			if(this.getExample() != null && this.getExample()[i] != "") {
 				System.out.println(this.getExample()[i]);
 			}
 		}
 	}
 	
-	//& this.getExample()[i] != "" & !this.getExample()[i].equals("null")
+	//&& this.getExample()[i] != "" && !this.getExample()[i].equals("null")
 	
 	//My API key for Merriam-Webster's Dictionary
 	private final String DICTIONARY_KEY = "73b58ad7-1efd-43b8-944f-70f801e2c801";
@@ -160,8 +160,8 @@ public class Word implements Comparable<Word>, Cloneable {
 		if(o instanceof Word) {
 			Word otherWord = (Word) o;
 			if (this.getName().equals(otherWord.getName()) 
-					& this.getMeaning().equals(otherWord.getMeaning())
-					& Arrays.equals(this.getExample(), otherWord.getExample())) {
+					&& this.getMeaning().equals(otherWord.getMeaning())
+					&& Arrays.equals(this.getExample(), otherWord.getExample())) {
 				equals = true;
 			}
 		}

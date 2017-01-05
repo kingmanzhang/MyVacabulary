@@ -30,7 +30,7 @@ public class VocabularyApp {
 			do {
 				
 				System.out.println("\nChoose: O)pen a list C)reat a new list D)elete a list ");
-				if (scnr.hasNextLine() & !scnr.nextLine().isEmpty() ) {
+				if (scnr.hasNextLine() && !scnr.nextLine().isEmpty() ) {
 					choice = scnr.nextLine().toLowerCase().charAt(0);
 					//open a file of word list
 					if (choice == 'o') {
@@ -237,7 +237,7 @@ public class VocabularyApp {
 			System.out.print("Type in word or index to delete: ");
 		   if(scnr.hasNextInt()) {
 		   	int index = scnr.nextInt();
-		   	if (index > 0 & index <= wordlist.size()) {
+		   	if (index > 0 && index <= wordlist.size()) {
 		   		wordlist.delete(index);
 		   		wordDeleted = true;
 		   	} else {
@@ -294,7 +294,7 @@ public class VocabularyApp {
 		System.out.println("\nType in the index of a word to show: ");
 		if (scnr.hasNextInt()) {
 			int wordToShow = scnr.nextInt();
-			if (wordToShow  > 0 & wordToShow  <= wordlist.size()) {
+			if (wordToShow  > 0 && wordToShow  <= wordlist.size()) {
 				String URL = "https://www.merriam-webster.com/dictionary/" + wordlist.getWord(wordToShow - 1).getName();
 				try {
 					URI wordURL = new URI(URL);
