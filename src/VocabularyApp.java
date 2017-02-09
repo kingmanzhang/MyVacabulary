@@ -21,60 +21,43 @@ public class VocabularyApp {
 		
 		System.out.println("Welcome to use VocabularyApp!");
 		System.out.println("---------------------------------------------");
-	
+		
+	   //first ask user to operate on files 
 		numLists = fileList(FILE_EXTENSION, FILE_PATH);
-		if (numLists == 0) {
+		if (numLists == 0) { //if there is no word list, ask user to create one
 			filename = createList(FILE_PATH, scnr);
-		} else {
+		} else { //otherwise, ask user to open a list or create a new one, or delete one
 			char choice = ' ';
 			do {
-				
 				System.out.println("\nChoose: O)pen a list C)reat a new list D)elete a list ");
-				if (scnr.hasNextLine()  ) { //&& !scnr.nextLine().isEmpty()
-					choice = scnr.nextLine().toLowerCase().charAt(0);
-					//open a file of word list
-					if (choice == 'o') {
-						validInput = true;
-						boolean fileOpened = false;
-						do {
-							System.out.println("Which file to open");
-							filename = scnr.nextLine();
-							try {
-								myList = openList(filename);
-								fileOpened = true;
-							} catch (Exception e) {
-								fileOpened = false;
-								System.out.println("Invalid file name. Type again.");
-							}
-						} while (!fileOpened);
-					//create a new file of word list
-					} else if (choice == 'c'){
-						validInput = true;
-						filename = createList(FILE_PATH, scnr);
-					//delete a file of word list
-					} else if (choice == 'd') {
-						validInput = true;
-						boolean fileDeleted = false;
-						do {
-							System.out.println("Which file to delete");
-							filename = scnr.nextLine();
-							try{
-					    		File file = new File(filename);
-					    		if(file.delete()){
-					    			fileDeleted = true;
-					    			System.out.println(file.getName() + " is deleted!");
-					    		}else{
-					    			System.out.println("Delete operation is failed.");
-					    		}
-							}catch(Exception e){
-					    		e.printStackTrace();
-					    	}
-						} while (!fileDeleted);
+				try {		
+					String newline = scnr.nextLine();
+					if(newline.isEmpty()) {
+						throw new IOException();
 					}
-				}else {
-						System.out.println("Invalid input.");
-						validInput = false;
-					}	
+					
+					choice = newline.toLowerCase().charAt(0);
+					if(choice == 'o' || choice == 'c' || choice == 'd') {
+						validInput = true;						
+						switch (choice) {
+						case 'o':			
+							openfile(scnr, myList);						
+							break;							
+							
+						case 'c': 
+							filename = createList(FILE_PATH, scnr);
+							break;
+						case 'd':
+							deletefile(scnr);
+							break;							
+						}						
+					} else {
+						System.out.println("cannot recognize command");
+					}
+				} catch (IOException e) {
+					System.out.println("Invalid input.");
+					validInput = false;
+				}
 			} while (!validInput || choice == 'd');
 		}
 			
@@ -82,7 +65,7 @@ public class VocabularyApp {
 		WordList originalList = null;
 		try {
 			originalList = myList.clone();
-		} catch (CloneNotSupportedException e) {
+		} catch (CloneNotSupportedException e) {//impossible
 			e.printStackTrace();
 		}
 		
@@ -140,6 +123,49 @@ public class VocabularyApp {
 		System.out.println("Thank you for using the app");
 		}
 
+	/**
+	 * A helper method to open a file 
+	 * @param scnr: main scanner
+	 * @param myList: import words in the file to this list
+	 */
+	public static void openfile(Scanner scnr, WordList myList) {
+		
+		boolean fileOpened = false;
+		String filename = "";
+		do {
+			System.out.println("Which file to open");
+			
+			try {
+				filename = scnr.nextLine();
+				myList = openList(filename);
+				fileOpened = true;
+			} catch (FileNotFoundException e) {
+				fileOpened = false;
+				System.out.println("File is not found. Type again.");
+			} catch (IOException e) {
+				System.out.println("Invalid input. Type again.");
+			}
+		} while (!fileOpened);
+		
+	}
+	
+	/**
+	 * A helper method to delete a file
+	 * @param scnr
+	 */
+	public static void deletefile(Scanner scnr) {
+		
+		String filename = "";
+		System.out.println("Which file to delete");
+		filename = scnr.nextLine();
+		File file = new File(filename);
+		if(file.delete()){			
+			System.out.println(file.getName() + " is deleted!");
+		}else{
+			System.out.println("Delete operation is failed.");
+		}
+		
+	}
 
 	/**
 	 * A method to create a file for a new word list. 
@@ -166,10 +192,9 @@ public class VocabularyApp {
 	 * A method to open an existing file.
 	 * @param filename: name of file to open. 
 	 * @return a word list parsed from the file. 
-	 * @throws FileNotFoundException
 	 * @throws IOException
 	 */
-	public static WordList openList(String filename) throws FileNotFoundException, IOException{
+	public static WordList openList(String filename) throws IOException{
 		WordList myList = new WordList();
 		String[] str;
 		String newLine;
