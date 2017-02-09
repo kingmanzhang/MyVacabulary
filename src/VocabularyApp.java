@@ -30,7 +30,7 @@ public class VocabularyApp {
 			do {
 				
 				System.out.println("\nChoose: O)pen a list C)reat a new list D)elete a list ");
-				if (scnr.hasNextLine() && !scnr.nextLine().isEmpty() ) {
+				if (scnr.hasNextLine()  ) { //&& !scnr.nextLine().isEmpty()
 					choice = scnr.nextLine().toLowerCase().charAt(0);
 					//open a file of word list
 					if (choice == 'o') {
