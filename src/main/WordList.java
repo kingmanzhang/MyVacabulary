@@ -1,5 +1,7 @@
+package main;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.TreeSet;
 /**
  * A WordList class to manager word lists. A user should be able to add, delete or show
  * words. 
@@ -9,6 +11,7 @@ import java.util.Collections;
 public class WordList implements Cloneable {
 	
 	private ArrayList<Word> wordList; 
+	
 	
 	public WordList() {
 		
@@ -24,7 +27,8 @@ public class WordList implements Cloneable {
 	}
 	
 	public void delete(int index) {
-		wordList.remove(index);
+
+		wordList.remove(index - 1);
 	}
 	
 	/**

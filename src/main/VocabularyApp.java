@@ -1,3 +1,4 @@
+package main;
 import java.awt.Desktop;
 import java.io.File;
 import java.io.FileInputStream;
@@ -7,7 +8,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Scanner;
+import java.util.Set;
 
 public class VocabularyApp {
 	public static void main(String[] args){
@@ -15,7 +19,7 @@ public class VocabularyApp {
 		final String FILE_PATH = "./";
 		int numLists = 0;
 		boolean validInput = false;
-		WordList myList = new WordList();
+		WordListHash myList = new WordListHash();
 		String filename = "";
 		Scanner scnr = new Scanner(System.in);
 		
@@ -41,7 +45,7 @@ public class VocabularyApp {
 						validInput = true;						
 						switch (choice) {
 						case 'o':			
-							openfile(scnr, myList);						
+							myList = openfile(scnr, myList);						
 							break;							
 							
 						case 'c': 
@@ -62,7 +66,7 @@ public class VocabularyApp {
 		}
 			
 		//keep a clone of current word list
-		WordList originalList = null;
+		WordListHash originalList = null;
 		try {
 			originalList = myList.clone();
 		} catch (CloneNotSupportedException e) {//impossible
@@ -128,7 +132,7 @@ public class VocabularyApp {
 	 * @param scnr: main scanner
 	 * @param myList: import words in the file to this list
 	 */
-	public static void openfile(Scanner scnr, WordList myList) {
+	public static WordListHash openfile(Scanner scnr, WordListHash myList) {
 		
 		boolean fileOpened = false;
 		String filename = "";
@@ -147,6 +151,7 @@ public class VocabularyApp {
 			}
 		} while (!fileOpened);
 		
+		return myList;
 	}
 	
 	/**
@@ -194,13 +199,13 @@ public class VocabularyApp {
 	 * @return a word list parsed from the file. 
 	 * @throws IOException
 	 */
-	public static WordList openList(String filename) throws IOException{
-		WordList myList = new WordList();
+	public static WordListHash openList(String filename) throws IOException{
+		WordListHash myList = new WordListHash();
 		String[] str;
 		String newLine;
 		String word_name;
 		String word_meaning;
-		String[] word_sentences;
+		LinkedList<String> word_sentences;
 		
 		FileInputStream list = new FileInputStream(filename);
 		//myList = readFromFile(list);
@@ -208,14 +213,19 @@ public class VocabularyApp {
 		while(wordParser.hasNextLine()) {
 			newLine = wordParser.nextLine();
 			str = newLine.split(";");
-			word_sentences = new String[] {"", "", "", "", ""};
+			word_sentences = new LinkedList<String>();
 			word_name = str[0];
 			word_meaning = str[1];
 			for (int i = 0; i < str.length - 2; i++) {
-				word_sentences[i] = str[i + 2];
+				word_sentences.add(str[i + 2]);
 			}
 			Word newWord = new Word(word_name, word_meaning, word_sentences);
-			myList.addWord(newWord);
+			try {
+				myList.addWord(newWord);
+			} catch (WordDuplicateException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		wordParser.close();
 		list.close();
@@ -229,8 +239,8 @@ public class VocabularyApp {
 	 * @param wordlist
 	 * @param scnr
 	 */
-	public static void add(WordList wordlist, Scanner scnr) {
-		String[] examples = new String[] {"", "", "", "", ""};
+	public static void add(WordListHash wordlist, Scanner scnr) {
+		LinkedList<String> examples = new LinkedList<String>();
 		System.out.println("Type in word: ");
 		String name = scnr.nextLine();
 		if (wordlist.contains(name)) {
@@ -241,11 +251,23 @@ public class VocabularyApp {
 			System.out.println(newWord.getMerriamWebsterMeaning());
 			System.out.println("Type in meaning in one line: ");
 			String meaning = scnr.nextLine();
-			System.out.println("Type in an example sentence: ");
-			examples[0] = scnr.nextLine();
+			System.out.println("Type in an example sentence or END: ");
+			String newSentence = "";
+			do {
+				newSentence = scnr.nextLine();
+				if(!newSentence.isEmpty() && !newSentence.equals("END")){
+					examples.add(newSentence);
+				}
+			} while (!newSentence.equals("END"));
+			
 			newWord.setMeaning(meaning);
 			newWord.setExample(examples);
-			wordlist.addWord(newWord);
+			try {
+				wordlist.addWord(newWord);
+			} catch (WordDuplicateException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			System.out.println("Adding new word.");
 		}
 	}
@@ -256,10 +278,11 @@ public class VocabularyApp {
 	 * @param wordlist
 	 * @param scnr
 	 */
-	public static void delete(WordList wordlist, Scanner scnr) {
+	public static void delete(WordListHash wordlist, Scanner scnr) {
 		boolean wordDeleted = false;
 		do {
-			System.out.print("Type in word or index to delete: ");
+			System.out.print("Type in word to delete: ");
+			/*
 		   if(scnr.hasNextInt()) {
 		   	int index = scnr.nextInt();
 		   	if (index > 0 && index <= wordlist.size()) {
@@ -268,7 +291,8 @@ public class VocabularyApp {
 		   	} else {
 		   		System.out.println("Input index is out of range. Enter a number between 1 and " + wordlist.size());
 		   	}
-		   } else {
+		   	*/
+		   
 		   	String name = scnr.nextLine();
 		   	try {
 		   		wordlist.delete(name);
@@ -276,7 +300,7 @@ public class VocabularyApp {
 		   	} catch (Exception e) {
 		   		System.out.println("Input word not found.");
 		   	}
-		   }
+		   
 		} while (!wordDeleted);
 	}
 	
@@ -286,22 +310,31 @@ public class VocabularyApp {
 	 * @param wordlist: the word list to write out.
 	 * @param filename: the file that the list should be written to.
 	 */
-	public static void write(WordList wordlist, String filename) {
+	public static void write(WordListHash wordlist, String filename) {
 	   try {
 	   	//try to create a FileOutputStream to the file
 			FileOutputStream fileStringStream = new FileOutputStream(filename);
 			PrintWriter output = new PrintWriter(fileStringStream);
 			//print the names and address of each place to the file. 
 			//Separate them with ";"
-			for (int i = 0; i < wordlist.size(); i++) {
-				output.print(wordlist.getWord(i).getName() + ";");
-				output.print(wordlist.getWord(i).getMeaning() + ";");
-				String[] sentences = wordlist.getWord(i).getExample();
-				int j = 0;
-				for (j = 0; j < sentences.length - 1; j++) {
-					output.print(sentences[j] + ";");
+			Set<String> allwords = wordlist.getList();
+			Iterator<String> itrWord = allwords.iterator();
+			while(itrWord.hasNext()) {
+				Word nextWord = wordlist.getWord(itrWord.next());
+				output.print(nextWord.getName() + ";");
+				output.print(nextWord.getMeaning() + ";");
+				LinkedList<String> sentences = nextWord.getExample();
+				Iterator<String> itr = sentences.iterator();
+				int j = 1;
+				while(itr.hasNext()) {
+					if(j == sentences.size()){
+						output.println(itr.next());
+					} else {
+						output.print(itr.next() + ";");
+						j++;
+					}		
 				}
-				output.println(sentences[j]);
+				
 			}
 			output.close();
 			//if user types in a invalid file, deal the exception
@@ -315,12 +348,11 @@ public class VocabularyApp {
 	 * @param wordlist
 	 * @param scnr
 	 */
-	public static void show(WordList wordlist, Scanner scnr) {
-		System.out.println("\nType in the index of a word to show: ");
-		if (scnr.hasNextInt()) {
-			int wordToShow = scnr.nextInt();
-			if (wordToShow  > 0 && wordToShow  <= wordlist.size()) {
-				String URL = "https://www.merriam-webster.com/dictionary/" + wordlist.getWord(wordToShow - 1).getName();
+	public static void show(WordListHash wordlist, Scanner scnr) {
+		System.out.println("\nType in the word to show on Merriam-webster's website: ");
+		String query = scnr.nextLine().trim().toLowerCase();
+		if(!query.isEmpty() && wordlist.contains(query)) {
+				String URL = "https://www.merriam-webster.com/dictionary/" + query;
 				try {
 					URI wordURL = new URI(URL);
 					Desktop desktop = Desktop.getDesktop();
@@ -330,11 +362,9 @@ public class VocabularyApp {
 				} catch (IOException e) {
 					System.out.println("Cannot open URL");
 				}
-			} else {
-				System.out.println("Input not valid. Enter a number between 1 and " + wordlist.size());
-			}
+			
 		} else {
-			System.out.println("Input should be a number.");
+			System.out.println("Query word is not in the list.");
 		}
 		scnr.nextLine();
 	}
@@ -348,7 +378,7 @@ public class VocabularyApp {
 	 * @param scnr
 	 * @param filename
 	 */
-	public static void quit(WordList originalList, WordList newList, Scanner scnr, String filename) {
+	public static void quit(WordListHash originalList, WordListHash newList, Scanner scnr, String filename) {
 		if (originalList.isChanged(newList)) {
 			boolean validChoice = false;
 			do {

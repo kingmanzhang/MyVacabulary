@@ -1,3 +1,4 @@
+package main;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -6,7 +7,8 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Arrays;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 /**
  * A Word class to manage single words. Each word should at least have a name, meaning, 
@@ -15,28 +17,31 @@ import java.util.Arrays;
  * @author Xingmin Zhang
  *
  */
-public class Word implements Comparable<Word>, Cloneable {
+public class Word implements Comparable<Word>, Cloneable, Prioritizable {
 	private String word_name;
 	private String word_meaning;
-	private String[] word_example;
-	private final int MAX_EXAMPLE = 5;
+	private LinkedList<String> word_example;
+	private int priority;
 	
 	public Word() {
-		this.word_name = null;
-		this.word_meaning = null;
-		this.word_example = new String[MAX_EXAMPLE];
+		this.word_name = "";
+		this.word_meaning = "";
+		this.word_example = new LinkedList<String>();
+		this.priority = 1;
 	}
 	
 	public Word(String name) {
 		this.word_name = name;
-		this.word_meaning = null;
-		this.word_example = new String[MAX_EXAMPLE];
+		this.word_meaning = "";
+		this.word_example = new LinkedList<String>();
+		this.priority = 1;
 	}
 	
-	public Word(String name, String word_meaning, String[] word_example) {
+	public Word(String name, String word_meaning, LinkedList<String> word_example) {
 		this.word_name = name;
 		this.word_meaning = word_meaning;
 		this.word_example = word_example;
+		this.priority = 1;
 	}
 	
 	public void setName(String word) {
@@ -55,11 +60,11 @@ public class Word implements Comparable<Word>, Cloneable {
 		return word_meaning;
 	}
 	
-	public void setExample(String[] examples) {
+	public void setExample(LinkedList<String> examples) {
 		word_example = examples;
 	}
 	
-	public String[] getExample() {
+	public LinkedList<String> getExample() {
 		return word_example;
 	}
 
@@ -67,10 +72,9 @@ public class Word implements Comparable<Word>, Cloneable {
 	 * A method to print the example sentences of a word.
 	 */
 	public void printExample() {
-		for (int i = 0; i < this.getExample().length; i++) {
-			if(this.getExample() != null && this.getExample()[i] != "") {
-				System.out.println(this.getExample()[i]);
-			}
+		Iterator<String> itr = word_example.iterator();
+		while(itr.hasNext()) {
+			System.out.println(itr.next());
 		}
 	}
 	
@@ -156,16 +160,34 @@ public class Word implements Comparable<Word>, Cloneable {
 	 */
 	@Override
 	public boolean equals(Object o) {
-		boolean equals = false;
-		if(o instanceof Word) {
-			Word otherWord = (Word) o;
-			if (this.getName().equals(otherWord.getName()) 
-					&& this.getMeaning().equals(otherWord.getMeaning())
-					&& Arrays.equals(this.getExample(), otherWord.getExample())) {
-				equals = true;
-			}
+		
+		if(!(o instanceof Word)) {
+			return false;
 		}
-		return equals;
+
+		Word otherWord = (Word) o;
+		if(!this.getName().equals(otherWord.getName())) {
+			return false;
+		}
+		if(!this.getMeaning().equals(otherWord.getMeaning())) {
+			return false;
+		}
+		
+		if(this.getExample().size() != otherWord.getExample().size()) {
+			return false;
+		} else {
+			Iterator<String> itr_ori = this.getExample().iterator();
+			Iterator<String> itr_new = otherWord.getExample().iterator();
+			while(itr_ori.hasNext() && itr_new.hasNext()) {
+				if(!itr_ori.next().equals(itr_new.next())) {
+					return false;
+				}
+			}
+			return true;
+		}
+			
+		
+		
 	}
 	
 	
@@ -173,18 +195,39 @@ public class Word implements Comparable<Word>, Cloneable {
 	 * A method to (deep) clone a word. 
 	 * The cloned copy should have its own copy of all the fields of a word.  
 	 */
+	@Override
 	public Word clone() {
 		Word copy = new Word();
 		copy.word_name = new String(this.word_name);
-		copy.word_meaning = new String(this.word_meaning);
-		copy.word_example = new String[word_example.length];
-		for (int i = 0; i < this.word_example.length; i++) {
-			if(word_example != null) {
-				copy.word_example[i] = new String(this.word_example[i]);
-			}
-			
+		if(getMeaning() != null) {
+			copy.word_meaning = new String(this.word_meaning);
 		}
+		if(getExample() != null) {
+			Iterator<String> itr = word_example.iterator();
+			while(itr.hasNext()) {
+				copy.word_example.add(new String(itr.next()));
+			}
+		}
+		
 		return copy;
+		
+	}
+
+	@Override
+	public int getPriority() {
+		// TODO Auto-generated method stub
+		return priority;
+	}
+	
+	public void increasePriority() {
+		
+		priority++;
+		
+	}
+	
+	public void decreasePriority() {
+		
+		priority--;
 		
 	}
 
