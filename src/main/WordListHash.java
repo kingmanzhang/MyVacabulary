@@ -4,7 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.PriorityQueue;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -150,4 +152,39 @@ public class WordListHash implements Cloneable {
 		return copy;
 	}
 
+	public void resetReviewedNum() {
+		Set<String> list = this.getList();
+		Iterator<String> itr = list.iterator();
+		while(itr.hasNext()) {
+			this.getWord(itr.next()).setReviewedNum(0);
+		}
+	}
+	
+	
+	public PriorityQueue<Word> priorityWord() {
+		Set<String> list = this.getList();
+		PriorityQueue<Word> wordsInQueue = 
+				new PriorityQueue<Word>(list.size(), new WordPriorityComparator());
+		Iterator<String> itr = list.iterator();
+		while(itr.hasNext()) {
+			wordsInQueue.add(getWord(itr.next()));
+		}
+		return wordsInQueue;
+	}
+	
+	public LinkedList<Word> topWords(int N) {
+		
+		PriorityQueue<Word> wordsInQueue = this.priorityWord();
+		LinkedList<Word> wordsToReview = new LinkedList<>();
+		int count = 0;
+		while(!wordsInQueue.isEmpty() && count < N) {
+			Word temp = wordsInQueue.remove();
+			if(temp.getReviewedNum() < 2) {
+				wordsToReview.add(temp);
+				count++;
+			}
+			
+		}
+		return wordsToReview;
+	}
 }

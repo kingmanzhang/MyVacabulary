@@ -44,8 +44,14 @@ public class VocabularyApp {
 					if(choice == 'o' || choice == 'c' || choice == 'd') {
 						validInput = true;						
 						switch (choice) {
-						case 'o':			
-							myList = openfile(scnr, myList);						
+						case 'o':
+							System.out.println("Which file to open");
+							try {
+								filename = scnr.nextLine();
+								myList = openList(filename);	
+							} catch (FileNotFoundException e) {
+								System.out.println("File is not found. Type again.");
+							}					
 							break;							
 							
 						case 'c': 
@@ -81,11 +87,11 @@ public class VocabularyApp {
 			validInput = false;
 			char choice = ' ';
 			do {
-				System.out.println("Choose: A)dd D)elete S)how W)rite Q)uit");
+				System.out.println("Choose: A)dd D)elete R)eview S)how W)rite Q)uit");
 				if (!scnr.hasNextInt()) {
 					choice = scnr.nextLine().toLowerCase().charAt(0);
 					if (choice == 'a' || choice == 'd' || choice == 's' 
-							|| choice == 'w' || choice == 'q') {
+							|| choice == 'w' || choice == 'q' || choice == 'r') {
 						validInput = true;
 					} else {
 						System.out.println("Input not valid. Type again.");
@@ -115,6 +121,10 @@ public class VocabularyApp {
 				pressEnter(scnr);
 				write(myList, filename);
 				break;
+			case 'r': //review word
+				review(myList, scnr, filename);
+				pressEnter(scnr);
+				break;
 			case 'q':
 				quit(originalList, myList, scnr, filename);
 				System.out.println("quiting program.");
@@ -132,7 +142,7 @@ public class VocabularyApp {
 	 * @param scnr: main scanner
 	 * @param myList: import words in the file to this list
 	 */
-	public static WordListHash openfile(Scanner scnr, WordListHash myList) {
+	public static String openfile(Scanner scnr, WordListHash myList) {
 		
 		boolean fileOpened = false;
 		String filename = "";
@@ -151,7 +161,7 @@ public class VocabularyApp {
 			}
 		} while (!fileOpened);
 		
-		return myList;
+		return filename;
 	}
 	
 	/**
@@ -203,6 +213,7 @@ public class VocabularyApp {
 		WordListHash myList = new WordListHash();
 		String[] str;
 		String newLine;
+		int priority;
 		String word_name;
 		String word_meaning;
 		LinkedList<String> word_sentences;
@@ -214,12 +225,14 @@ public class VocabularyApp {
 			newLine = wordParser.nextLine();
 			str = newLine.split(";");
 			word_sentences = new LinkedList<String>();
-			word_name = str[0];
-			word_meaning = str[1];
-			for (int i = 0; i < str.length - 2; i++) {
-				word_sentences.add(str[i + 2]);
+			priority = Integer.parseInt(str[0]);
+			word_name = str[1];
+			word_meaning = str[2];
+			for (int i = 0; i < str.length - 3; i++) {
+				word_sentences.add(str[i + 3]);
 			}
 			Word newWord = new Word(word_name, word_meaning, word_sentences);
+			newWord.setPriority(priority);
 			try {
 				myList.addWord(newWord);
 			} catch (WordDuplicateException e) {
@@ -304,6 +317,55 @@ public class VocabularyApp {
 		} while (!wordDeleted);
 	}
 	
+	/**
+	 * The review function allows user to review words. 
+	 * The words are presented to user by their priority. 
+	 * Every word start with a priority of 100; if a user recognizes the word, decrease
+	 * priority by 7; if a user failed to recognize the word, increase by 7. Priority
+	 * does not go above 200 or below 1 
+	 * @param wordlist
+	 * @param scnr
+	 */
+	public static void review(WordListHash wordlist, Scanner scnr, String filename) {
+		
+		wordlist.resetReviewedNum();
+		
+		System.out.println("Begin reviewing the most unfamiliar words");
+		boolean terminate = false;
+		do {
+			LinkedList<Word> topWords = wordlist.topWords(wordlist.size()/3);
+			if(topWords.size() == 0) {
+				System.out.println("Congratulations! No more words to review currently.");
+				break;
+			}
+			while(!topWords.isEmpty()) {
+				Word currentWord = topWords.remove();
+				wordlist.getWord(currentWord.getName()).increaseReviewedNum();
+				System.out.println("\nnext word:\n");
+				System.out.println("--------------------------");
+				System.out.println(currentWord.getName());
+				System.out.println("--------------------------");
+				System.out.println("\nremember the word? Y/N. type END to terminate session");
+				String inputLine = scnr.nextLine();
+				if(!inputLine.isEmpty()) {
+					if(inputLine.equals("END")) {
+						terminate = true;
+						break;
+					}else if(inputLine.toUpperCase().charAt(0) == 'Y') {
+						System.out.println("Well done");
+						wordlist.getWord(currentWord.getName()).adjPriority(-7);
+					}else if(inputLine.toUpperCase().charAt(0) == 'N') {
+						wordlist.getWord(currentWord.getName()).adjPriority(7);
+						currentWord.print();
+					} else {
+						System.out.println("invalid input");
+					}
+				}
+			}
+		} while(!terminate);
+		
+		write(wordlist, filename);
+	}
 	
 	/**
 	 * A method to write the current word list to a file. 
@@ -321,6 +383,7 @@ public class VocabularyApp {
 			Iterator<String> itrWord = allwords.iterator();
 			while(itrWord.hasNext()) {
 				Word nextWord = wordlist.getWord(itrWord.next());
+				output.print(nextWord.getPriority() + ";");
 				output.print(nextWord.getName() + ";");
 				output.print(nextWord.getMeaning() + ";");
 				LinkedList<String> sentences = nextWord.getExample();
@@ -334,8 +397,9 @@ public class VocabularyApp {
 						j++;
 					}		
 				}
-				
+				output.print("\n");
 			}
+			
 			output.close();
 			//if user types in a invalid file, deal the exception
 		} catch (FileNotFoundException e) {

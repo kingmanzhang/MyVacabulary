@@ -22,26 +22,30 @@ public class Word implements Comparable<Word>, Cloneable, Prioritizable {
 	private String word_meaning;
 	private LinkedList<String> word_example;
 	private int priority;
+	private int reviewedNum;
 	
 	public Word() {
 		this.word_name = "";
 		this.word_meaning = "";
 		this.word_example = new LinkedList<String>();
-		this.priority = 1;
+		this.priority = 100;
+		this.reviewedNum = 0;
 	}
 	
 	public Word(String name) {
 		this.word_name = name;
 		this.word_meaning = "";
 		this.word_example = new LinkedList<String>();
-		this.priority = 1;
+		this.priority = 100;
+		this.reviewedNum = 0;
 	}
 	
 	public Word(String name, String word_meaning, LinkedList<String> word_example) {
 		this.word_name = name;
 		this.word_meaning = word_meaning;
 		this.word_example = word_example;
-		this.priority = 1;
+		this.priority = 100;
+		this.reviewedNum = 0;
 	}
 	
 	public void setName(String word) {
@@ -67,6 +71,17 @@ public class Word implements Comparable<Word>, Cloneable, Prioritizable {
 	public LinkedList<String> getExample() {
 		return word_example;
 	}
+	
+	public void increaseReviewedNum() {
+		this.reviewedNum += 1;
+	}
+	
+	public void setReviewedNum(int num) {
+		this.reviewedNum = num;
+	}
+	public int getReviewedNum() {
+		return reviewedNum;
+	}
 
 	/**
 	 * A method to print the example sentences of a word.
@@ -76,6 +91,11 @@ public class Word implements Comparable<Word>, Cloneable, Prioritizable {
 		while(itr.hasNext()) {
 			System.out.println(itr.next());
 		}
+	}
+	
+	public void print() {
+		System.out.println(getMeaning());
+		printExample();
 	}
 	
 	//&& this.getExample()[i] != "" && !this.getExample()[i].equals("null")
@@ -215,20 +235,21 @@ public class Word implements Comparable<Word>, Cloneable, Prioritizable {
 
 	@Override
 	public int getPriority() {
-		// TODO Auto-generated method stub
+		
 		return priority;
-	}
-	
-	public void increasePriority() {
-		
-		priority++;
 		
 	}
 	
-	public void decreasePriority() {
-		
-		priority--;
-		
+	@Override
+	public void adjPriority(int points) { //points can be positive or negative
+		if(priority + points < 200 && priority + points > 0) {
+			priority = priority + points;
+		}		
 	}
+	
+	public void setPriority(int priority) {
+		this.priority = priority;
+	}
+	
 
 }

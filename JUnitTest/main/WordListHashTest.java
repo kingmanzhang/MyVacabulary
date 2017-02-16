@@ -2,10 +2,10 @@ package main;
 
 import static org.junit.Assert.*;
 
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
+import java.util.LinkedList;
+import java.util.PriorityQueue;
+
+
 import org.junit.Test;
 
 public class WordListHashTest {
@@ -105,6 +105,83 @@ public class WordListHashTest {
 			System.out.println("word duplication! Add a different one");
 		}
 		newlist.printList();
+	}
+	
+	@Test
+	public void testPriorityWords() {
+		WordListHash newlist = new WordListHash();
+		try{
+			Word newWord = new Word("wisc");
+			newWord.adjPriority(50);
+			newlist.addWord(newWord);
+			
+			newWord = new Word("minn");
+			newWord.adjPriority(60);
+			newlist.addWord(newWord);
+			
+			newWord = new Word("ny");
+			newWord.adjPriority(80);
+			newlist.addWord(newWord);
+			
+			newWord = new Word("oi");
+			newWord.adjPriority(-20);
+			newlist.addWord(newWord);
+			
+			newWord = new Word("ct");
+			newWord.adjPriority(-40);
+			newlist.addWord(newWord);
+			
+			newWord = new Word("tx");
+			newWord.adjPriority(-90);
+			newlist.addWord(newWord);
+			
+		} catch (WordDuplicateException e) {
+			System.out.println("word duplication! Add a different one");
+		}
+		PriorityQueue<Word> wordsInQueue = newlist.priorityWord();
+		assertEquals(6, newlist.size());
+		assertEquals("ny", wordsInQueue.remove().getName());
+		assertEquals("minn", wordsInQueue.remove().getName());
+		assertEquals("wisc", wordsInQueue.remove().getName());
+		
+	}
+	
+	@Test
+	public void testTopWords() {
+		WordListHash newlist = new WordListHash();
+		try{
+			Word newWord = new Word("wisc");
+			newWord.adjPriority(50);
+			newlist.addWord(newWord);
+			
+			newWord = new Word("minn");
+			newWord.adjPriority(60);
+			newlist.addWord(newWord);
+			
+			newWord = new Word("ny");
+			newWord.adjPriority(80);
+			newlist.addWord(newWord);
+			
+			newWord = new Word("oi");
+			newWord.adjPriority(-20);
+			newlist.addWord(newWord);
+			
+			newWord = new Word("ct");
+			newWord.adjPriority(-40);
+			newlist.addWord(newWord);
+			
+			newWord = new Word("tx");
+			newWord.adjPriority(-90);
+			newlist.addWord(newWord);
+			
+		} catch (WordDuplicateException e) {
+			System.out.println("word duplication! Add a different one");
+		}
+		LinkedList<Word> wordsInQueue = newlist.topWords(4);
+		assertEquals("ny", wordsInQueue.remove().getName());
+		assertEquals("minn", wordsInQueue.remove().getName());
+		assertEquals("wisc", wordsInQueue.remove().getName());
+		
 	}
 
 }
