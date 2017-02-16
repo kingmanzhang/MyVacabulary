@@ -28,7 +28,7 @@ public class Word implements Comparable<Word>, Cloneable, Prioritizable {
 		this.word_name = "";
 		this.word_meaning = "";
 		this.word_example = new LinkedList<String>();
-		this.priority = 100;
+		this.priority = 20;
 		this.reviewedNum = 0;
 	}
 	
@@ -36,7 +36,7 @@ public class Word implements Comparable<Word>, Cloneable, Prioritizable {
 		this.word_name = name;
 		this.word_meaning = "";
 		this.word_example = new LinkedList<String>();
-		this.priority = 100;
+		this.priority = 20;
 		this.reviewedNum = 0;
 	}
 	
@@ -44,7 +44,7 @@ public class Word implements Comparable<Word>, Cloneable, Prioritizable {
 		this.word_name = name;
 		this.word_meaning = word_meaning;
 		this.word_example = word_example;
-		this.priority = 100;
+		this.priority = 20;
 		this.reviewedNum = 0;
 	}
 	
